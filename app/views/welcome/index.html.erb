@@ -1,0 +1,5 @@
+<%= form_tag("/edit_links", method: "post") %>
+   
+   <%= label_tag(:links, "Past links URLs") %>
+   <%= text_area_tag(:links, "", size: "24x8") %>
+   <%= submit_tag "Submit links" %>

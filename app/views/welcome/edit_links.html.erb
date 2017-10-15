@@ -1,0 +1,118 @@
+<%= form_tag("/all_links", method: "post") %>
+  <% @converted_links.each_with_index do |section, i| %>
+    <%= "<h2>#{section['section']}</h2>".html_safe %>
+    <% section['links'].each_with_index do |link, j| %>
+      <span class="link">
+        <% unless link['title'].nil? %>
+          <% if link['author'] == "manual" %>
+            <%= text_field_tag "author#{i}[#{j}]" %>
+          <% else %>
+            <%= "<b>#{link['author']} - </b>".html_safe %>
+          <% end %>
+          <% unless link['title'] == "manual" %>
+            <% link['title'].split(" ").each_with_index do |title_word, x| %>
+              <span>
+                <a onClick="caseChange(this, <%= "#{i}, #{j}, #{x}" %>);" class="title-word"><%= title_word %></a>
+                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "dc", false, class: "hidden" %>
+                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "uc", false, class: "hidden" %>
+                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "tc", false, class: "hidden" %>
+                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "del", false, class: "hidden" %>
+              </span>
+            <% end %>
+          <% else #if link title is "manual" %>
+            <%= text_field_tag "title#{i}[#{j}]", "", placeholder: "#{link['placeholder'] if link['placeholder']}" %>
+          <% end %>
+          
+          <% if (link['title'] || link['author']) == "manual" %>
+            <%= link_to "#{link['url'].slice(0, 30)}...", link['url'], target: "_blank" %>
+          <% end %>
+          
+          <% if link['title'].size+link['author'].size+3 > 77 %>
+            <%= check_box_tag "f#{i}[#{j}]", "flagged", true %>
+          <% else %>
+            <%= check_box_tag "f#{i}[#{j}]", "flagged", false %>
+          <% end %>
+
+          <%= label_tag "f#{i}[#{j}]", "Flag" %>
+          <br>
+        <% end %>
+      </span>
+    <% end %>
+    
+  <% end %>
+  <br><br>
+  <%= submit_tag "To HTML" %>
+
+<script>
+  function caseChange(link, i, j, x) {
+      var newLink = link.innerHTML;
+      var reg = /^[a-zA-Z]$/;
+      var cap; 
+      var sliced = false;
+      var beg = false;
+      
+      var tcBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='tc']");
+      var ucBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='uc']");
+      var dcBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='dc']");
+      var delBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='del']");
+      
+      // FIND THE FIRST A-Za-z CHAR
+      if (reg.test(newLink[0]) == false) {  
+        for (var i=0; i<newLink.length; i++) {
+          if (reg.test(newLink[i]) == true) {
+            sliced = true;
+            beg = newLink.slice(0,i);
+            newLink = newLink.slice(i);
+            break;
+          }
+        }
+      }
+      
+      
+    if (newLink === newLink.toUpperCase() && delBox.is(":checked") == false) {
+      
+      console.log(link);
+      link.classList.add("del");
+    
+      tcBox.prop("checked", false);
+      ucBox.prop("checked", false);
+      dcBox.prop("checked", false);  
+      delBox.prop("checked", true);
+      
+    } else if (delBox.is(":checked")) {
+      if (sliced) {
+        link.innerHTML = beg + newLink.toLowerCase();
+      } else {
+        link.innerHTML = newLink.toLowerCase();
+      }
+      
+      link.classList.remove("del");
+      
+      delBox.prop("checked", false);
+      tcBox.prop("checked", false);
+      ucBox.prop("checked", false);
+      dcBox.prop("checked", true);
+
+    } else if (newLink[0] === newLink[0].toUpperCase() && newLink !== newLink.toUpperCase()) {
+      if (sliced) {
+        link.innerHTML = beg + newLink.toUpperCase();
+      } else {
+        link.innerHTML = newLink.toUpperCase();
+      }
+      
+      tcBox.prop("checked", false);
+      dcBox.prop("checked", false);
+      ucBox.prop("checked", true);
+      
+    } else if (newLink === newLink.toLowerCase()) {
+      if (sliced) {
+        link.innerHTML = beg + newLink[0].toUpperCase() + newLink.slice(1);
+      } else {
+        link.innerHTML = newLink[0].toUpperCase() + newLink.slice(1);
+      }
+      dcBox.prop("checked", false);
+      ucBox.prop("checked", false);
+      tcBox.prop("checked", true);
+    }
+  }
+</script>

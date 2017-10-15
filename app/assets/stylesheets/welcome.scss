@@ -1,0 +1,28 @@
+// Place all the styles related to the Welcome controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+.title-word {
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+}
+
+.hidden {
+    opacity: 0;
+    position: absolute;
+    left: -5000px;
+}
+
+span.link input[type=text]:nth-child(2) {
+    width: 550px;
+}
+
+span.link input[type=text]:first-child {
+    width: 100px;
+}
+
+.del {
+    text-decoration: line-through;
+    color: #900;
+}
