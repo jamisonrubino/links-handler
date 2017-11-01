@@ -14,15 +14,53 @@
     left: -5000px;
 }
 
-span.link input[type=text]:nth-child(2) {
+span.link input.title-input {
     width: 550px;
 }
 
-span.link input[type=text]:first-child {
+span.link input.author-input {
     width: 100px;
 }
 
 .del {
     text-decoration: line-through;
     color: #900;
+}
+
+#ready {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#ready span {
+    cursor: pointer;
+    font-weight: bold;
+    color: #aaa;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    background: #eee;
+}
+
+#ready span.ready {
+    background: #aea;
+    color: #062;
+}
+
+.edit-link {
+    cursor: pointer;
+    font-weight: bold;
+    color: #00b;
+}
+
+.url {
+    color: orange;
+}
+
+.flagged {
+    background: #ff9;
+}
+
+.hide {
+    display: none;
 }

@@ -1,0 +1,11 @@
+<% @html_links.each_with_index do |section, i| %>
+    <%= section['section'] %>
+    <br>
+    <textarea cols="80" rows="20">
+        <% @html_links[i]['links'].reverse_each do |l| %>
+            <%= l.strip + "\n" %>
+            <% puts l.strip %>
+        <% end %>
+    </textarea>
+    <br><br>
+<% end %>

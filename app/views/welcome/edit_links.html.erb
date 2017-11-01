@@ -1,76 +1,112 @@
-<%= form_tag("/all_links", method: "post") %>
-  <% @converted_links.each_with_index do |section, i| %>
-    <%= "<h2>#{section['section']}</h2>".html_safe %>
-    <% section['links'].each_with_index do |link, j| %>
-      <span class="link">
-        <% unless link['title'].nil? %>
-          <% if link['author'] == "manual" %>
-            <%= text_field_tag "author#{i}[#{j}]" %>
-          <% else %>
-            <%= "<b>#{link['author']} - </b>".html_safe %>
-          <% end %>
-          <% unless link['title'] == "manual" %>
-            <% link['title'].split(" ").each_with_index do |title_word, x| %>
-              <span>
-                <a onClick="caseChange(this, <%= "#{i}, #{j}, #{x}" %>);" class="title-word"><%= title_word %></a>
-                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "dc", false, class: "hidden" %>
-                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "uc", false, class: "hidden" %>
-                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "tc", false, class: "hidden" %>
-                <%= check_box_tag "#{i}[#{j}[#{x}]][]", "del", false, class: "hidden" %>
-              </span>
-            <% end %>
-          <% else #if link title is "manual" %>
-            <%= text_field_tag "title#{i}[#{j}]", "", placeholder: "#{link['placeholder'] if link['placeholder']}" %>
-          <% end %>
-          
-          <% if (link['title'] || link['author']) == "manual" %>
-            <%= link_to "#{link['url'].slice(0, 30)}...", link['url'], target: "_blank" %>
-          <% end %>
-          
-          <% if link['title'].size+link['author'].size+3 > 77 %>
-            <%= check_box_tag "f#{i}[#{j}]", "flagged", true %>
-          <% else %>
-            <%= check_box_tag "f#{i}[#{j}]", "flagged", false %>
-          <% end %>
+<%= form_tag("/all_links", id: "edit-links", method: "post") %>
+  <div id="ready">
+    <span>Ready to submit</span>
+  </div>
 
-          <%= label_tag "f#{i}[#{j}]", "Flag" %>
-          <br>
-        <% end %>
-      </span>
-    <% end %>
-    
+  <% @converted_links.each_with_index do |section, i| %>
+    <div class="section">
+      <%= "<h2>#{section['section']}</h2>".html_safe %>
+      <% section['links'].each_with_index do |link, j| %>
+      
+        <span class="link">
+          <% unless link['title'].nil? %>
+            <% if link['author'] == "manual" %>
+              <%= text_field_tag "author#{i}[#{j}]", "", class: "author-input" %>
+            <% else %>
+              <span class="edit-link" onClick="toggleInput(<%= "#{i}, #{j}"  %>);">[Edit]</span>
+              <span class="author"><%= "<b>#{link['author']} - </b>".html_safe %></span>
+              <%= text_field_tag "author#{i}[#{j}]", "", class: "author-input hide" %>
+            <% end %>
+            <% unless link['title'] == "manual" %>
+              <%= text_field_tag "title#{i}[#{j}]", "", class: "title-input hide" %>
+              <% link['title'].split(" ").each_with_index do |title_word, x| %>
+
+                <span>
+                  <a onClick="caseChange(this, <%= "#{i}, #{j}, #{x}" %>);" class="title-word"><%= title_word %></a>
+                  <%= check_box_tag "#{i}[#{j}[#{x}]][]", "dc", false, class: "hidden" %>
+                  <%= check_box_tag "#{i}[#{j}[#{x}]][]", "uc", false, class: "hidden" %>
+                  <%= check_box_tag "#{i}[#{j}[#{x}]][]", "tc", false, class: "hidden" %>
+                  <%= check_box_tag "#{i}[#{j}[#{x}]][]", "del", false, class: "hidden" %>
+                </span>
+              <% end %>
+            <% else #if link title is "manual" %>
+              <%= text_field_tag "title#{i}[#{j}]", link['placeholder'], class: "title-input" %>
+            <% end %>
+            
+            <%= link_to "#{link['url'].slice(0, 30)}...", link['url'], class: "url", target: "_blank" %>
+            <span class="flaggedspan">
+              <% if link['title'].size+link['author'].size+3 > 77 %>
+                <%= check_box_tag "f#{i}[#{j}]", "flagged", true %>
+              <% else %>
+                <%= check_box_tag "f#{i}[#{j}]", "flagged", false %>
+              <% end %>
+  
+              <%= label_tag "f#{i}[#{j}]", "Flag" %>
+            </span>
+            <br>
+          <% end %>
+        </span>
+      <% end %>
+    </div>
   <% end %>
   <br><br>
   <%= submit_tag "To HTML" %>
 
 <script>
+  (function(){
+    $("input[type=submit]").attr("disabled", "disabled");
+      var disabled = true;
+      $("#ready").click(function(){
+        if (disabled===true) {
+          disabled = false;
+          $("input[type=submit]").removeAttr("disabled");
+          $("#ready span").addClass("ready");
+        } else {
+          disabled = true;
+          $("input[type=submit]").attr("disabled", "disabled");
+          $("#ready span").removeClass();
+        }
+      });
+    
+    $("span.flaggedspan").each(function(i) {
+    	$(this).change(function() {
+        	flag(i);
+    	});
+    	if ($(this).find("input").is(":checked")) $("span.link").eq(i).addClass("flagged");
+    });
+  }());
+  
+  function flag(index) {
+    $("span.flaggedspan").eq(index).find("input").is(":checked") ? $("span.link").eq(index).addClass("flagged") : $("span.link").eq(index).removeClass("flagged");
+  }
+  
   function caseChange(link, i, j, x) {
-      var newLink = link.innerHTML;
-      var reg = /^[a-zA-Z]$/;
-      var cap; 
-      var sliced = false;
-      var beg = false;
-      
-      var tcBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='tc']");
-      var ucBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='uc']");
-      var dcBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='dc']");
-      var delBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='del']");
-      
-      // FIND THE FIRST A-Za-z CHAR
-      if (reg.test(newLink[0]) == false) {  
-        for (var i=0; i<newLink.length; i++) {
-          if (reg.test(newLink[i]) == true) {
-            sliced = true;
-            beg = newLink.slice(0,i);
-            newLink = newLink.slice(i);
-            break;
-          }
+    var newLink = link.innerHTML;
+    var reg = /^[a-zA-Z]$/;
+    var cap; 
+    var sliced = false;
+    var beg = false;
+
+    
+    var tcBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='tc']");
+    var ucBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='uc']");
+    var dcBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='dc']");
+    var delBox = $("input:checkbox[name='"+i+"["+j+"["+x+"]][]']").filter("[value='del']");
+    
+    // FIND THE FIRST A-Za-z CHAR, SEPARATE BEGINNING CHARS FROM LETTERS, MANIPULATE LETTERS, REJOIN LATER
+    if (reg.test(newLink[0]) === false) {  
+      for (var i=0; i<newLink.length; i++) {
+        if (reg.test(newLink[i]) === true) {
+          sliced = true;
+          beg = newLink.slice(0,i);
+          newLink = newLink.slice(i);
+          break;
         }
       }
+    }
       
       
     if (newLink === newLink.toUpperCase() && delBox.is(":checked") == false) {
-      
       console.log(link);
       link.classList.add("del");
     
@@ -115,4 +151,28 @@
       tcBox.prop("checked", true);
     }
   }
+  
+  function toggleInput(i, j) {
+    var link = $(".section").eq(i).find($("span.link")).eq(j);
+    if (link.find("span.author").text().length > 0) var author = link.find("span.author").text();
+    var title = [];
+    link.children().each((index) => {
+      let word = link.find("span").eq(index);
+      if (word.hasClass("")) {
+        title.push(word.find("a").eq(0).text()); 
+        if (!word.hasClass("flaggedspan")) {
+          word.addClass("hide");
+        }
+      } else if (word.hasClass("author") || word.hasClass("edit-link")) {
+        word.addClass("hide");
+      }
+    });
+
+    $(".section").eq(i).find($("input.title-input")).eq(j).val(title.join(" "));
+    $(".section").eq(i).find($("input.author-input")).eq(j).val(author.slice(0,-3));
+    $(".section").eq(i).find($("input.title-input")).eq(j).removeClass("hide");
+    $(".section").eq(i).find($("input.author-input")).eq(j).removeClass("hide");
+  }
+
+
 </script>
