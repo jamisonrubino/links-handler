@@ -1,0 +1,96 @@
+/* line 5, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+.title-word {
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
+}
+
+/* line 11, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+.hidden {
+  opacity: 0;
+  position: absolute;
+  left: -5000px;
+}
+
+/* line 17, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+span.link input.title-input {
+  width: 550px;
+}
+
+/* line 21, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+span.link input.author-input {
+  width: 100px;
+}
+
+/* line 25, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+.del {
+  text-decoration: line-through;
+  color: #900;
+}
+
+/* line 30, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+#ready {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* line 36, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+#ready span {
+  cursor: pointer;
+  font-weight: bold;
+  color: #aaa;
+  padding: 5px 10px;
+  box-sizing: border-box;
+  background: #eee;
+}
+
+/* line 45, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+#ready span.ready {
+  background: #aea;
+  color: #062;
+}
+
+/* line 50, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+.edit-link {
+  cursor: pointer;
+  font-weight: bold;
+  color: #00b;
+}
+
+/* line 56, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+.url {
+  color: orange;
+}
+
+/* line 60, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+.flagged {
+  background: #ff9;
+}
+
+/* line 64, /home/ubuntu/workspace/app/assets/stylesheets/welcome.scss */
+.hide {
+  display: none;
+}
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any styles
+ * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+ * file per style scope.
+ *
+
+
+ */
+
+
+body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
