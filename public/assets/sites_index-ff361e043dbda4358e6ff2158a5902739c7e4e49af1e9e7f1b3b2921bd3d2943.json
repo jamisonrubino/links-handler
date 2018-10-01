@@ -1,0 +1,6 @@
+[
+{"author": "John Rubino", "url": "http://www.dollarcollapse.com", "css": ".entry-title"}, 
+{"author": "Bloomberg", "url": "http://www.bloomberg.com", "css": "h1[class$=hed]"}, 
+{"author": "Daily Reckoning", "url": "http://www.dailyreckoning.com", "css": "#single-article-body h1"}, 
+{"author": "Zero Hedge", "url": "http://www.zerohedge.com", "css": ".article-list .title"}
+]

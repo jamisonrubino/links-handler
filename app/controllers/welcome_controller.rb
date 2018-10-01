@@ -1,201 +1,222 @@
 require 'nokogiri'
 require 'open-uri'
+require 'open_uri_redirections'
+require_relative 'sites_controller'
+
 class WelcomeController < ApplicationController
   def index
   end
-  
+
   def edit_links
-    all = params[:links].split("\r\n\r\n\r\n\r\n\r\n")
-    
-    sections = []
-    all.each_with_index do |s, i|
-      sections[i] = s.split("\n")
-    end
-    categorized_links = objectify_links(sections)
-    puts categorized_links
-    
+    all_links = params[:links].gsub "\r", ""
+    sites_path = "app/assets/javascripts/sites_index.json"
+    site_index = JSON.parse(File.read(sites_path))
+    categorized_links = objectify_links(all_links)
+
     @converted_links = convert_links(categorized_links)
     $converted_links = @converted_links
+
+    @new_sites.each_with_index do |x,i|
+      site_str = "#{x}"
+      site_str << "\n" if (i < @new_sites.size-1)
+      (@new_sites_html ||= "") << site_str
+    end
+  # (@new_sites_selectors ||= []) << find_selector(x)
   end
 
   def all_links
     @converted_links = $converted_links
-    
-    @converted_links.size.times do |i| # for each section
-      if params["#{i}"]
-        puts params["#{i}"]
-        @converted_links[i]["links"].size.times do |j|
-          if params["#{i}"]["#{j}"]
-            puts params["#{i}"]["#{j}"]
-            del_arr = []
-            @converted_links[i]["links"][j]["title"].split(" ").size.times do |x|
-              puts "i: #{i.to_s}, j: #{j.to_s}, x: #{x.to_s}"
-              if params["#{i}"]["#{j}"]["#{x}"]
-                word_param = params["#{i}"]["#{j}"]["#{x}"]
-                if word_param == ["uc"]
-                  title = @converted_links[i]["links"][j]['title'].split(" ")
-                  title[x].upcase!
-                  @converted_links[i]["links"][j]['title'] = title.join(" ")
-                elsif word_param == ["dc"]
-                  title = @converted_links[i]["links"][j]['title'].split(" ")
-                  title[x].downcase!
-                  @converted_links[i]["links"][j]['title'] = title.join(" ")
-                elsif word_param == ["tc"]
-                  title = @converted_links[i]["links"][j]['title'].split(" ")
-                  title[x].capitalize!
-                  @converted_links[i]["links"][j]['title'] = title.join(" ")
-                elsif word_param == ["del"]
-                  del_arr << x
-                end
-              end
-            end
-            title = @converted_links[i]["links"][j]['title'].split(" ")
-            title.delete_if.with_index { |_, index| del_arr.include? index }
-            @converted_links[i]["links"][j]['title'] = title.join(" ")
-          end
-        end
-        if params["f#{i}"]
-          params["f#{i}"].each do |flag|
-            @converted_links[i]["links"][flag[0].to_i]["flagged"] = "flagged"
-          end
-        end
-      end
-
-   # if author and title manually entered
-      if params["author#{i}"]
-        @converted_links[i]["links"].size.times do |j|
-          if params["author#{i}"]["#{j}"]
-            @converted_links[i]["links"][j]['author'] = params["author#{i}"]["#{j}"] if params["author#{i}"]["#{j}"].size > 0
-          end
-        end
-      end
-      if params["title#{i}"]
-        @converted_links[i]["links"].size.times do |j|
-          if params["title#{i}"]["#{j}"]
-            @converted_links[i]["links"][j]['title'] = params["title#{i}"]["#{j}"] if params["title#{i}"]["#{j}"].size > 0
-          end
-        end
-      end
-    end
-    
-    date = Time.now.getlocal('-01:00').strftime("%m/%d")
-    @html_links = []
-    @converted_links.each_with_index do |s, i|
-      @html_links[i] = {}
-      @html_links[i]['section'] = s['section']
-      @html_links[i]['links'] = []
-      s['links'].each_with_index do |l, j|
-        @html_links[i]['links'] << "#{date}" + "&nbsp;&nbsp;<a href='" + l['url'] + "' target='_blank'>" + (l['title'].nil? ? "" : l['title']) + "</a> – " + (l['author'].nil? ? "" : l['author'])
-      end
-    end
-    
+    process_links
+    $converted_links = nil
+    SitesMailer.new_sites_email(params[:sites]).deliver_now if params[:sites].present?
   end
 
-  
+  def add_site
+    site = SitesController.new(params[:author], params[:author], params[:css])
+    puts "#{site.author} #{site.url} #{site.css}"
+    save_site(site)
+  end
 
-  
   private
-  
-    def find_section_title(sections, i)
-      sections[i].each_with_index do |s, q|
-        s = s.strip
-        unless s.size < 3
-          return s
+    # def find_selector(title)
+    #   doc = Nokogiri::HTML(open("app/bloomberg.html"))
+    #   body_arr = doc.at_css('body').text.strip.split("<") #body split at <s
+    #   element = body_arr[body_arr.index{|x| x.include? title}] #search body for element containing title
+    #   tag = element[/\w/] #isolate element's tag name
+    #   classes = element[/(class=).+(\'|\"|\`)/i][8..-2] #isolate element's classes
+    # end
+
+    def objectify_links(all, categorized_links = [])
+      all.split(/\n{4,}/).each_with_index do |section, i|
+        section.split(/\n+/).each_with_index do |line, j|
+          ((categorized_links[i] ||= {})['links'] ||= []).push(line.split(/\s+/)[0].strip) if (line.strip[0..3] == "http" || !line.strip[/(http)?s?(\:\/\/)?\w+\.+\w+.*/].nil?)
+          puts line.strip[/(http)?s?(\:\/\/)?\w+\.+\w+.*/]
+          (categorized_links[i] ||= {})['section'] = line.strip if ((line.strip[0..3] != "http" && line.strip[/(http)?s?(\:\/\/)?\w+\.+\w+.*/].nil?) && line.size > 2)
         end
       end
-    end
-    
-    def objectify_links(sections)
-      categorized_links = []
-      sections.each_with_index do |s, i|
-        categorized_links[i] = {}
-        section_title = find_section_title(sections, i)
-        categorized_links[i]['section'] = section_title
-        s.map do |l|
-          link = l.strip
-          if link[0..3] == "http"
-            unless categorized_links[i]['links'].nil?
-              categorized_links[i]['links'] << link
-            else
-              categorized_links[i]['links'] = []
-              categorized_links[i]['links'] << link
-            end
-          end
-        end
-      end
+      puts categorized_links
       categorized_links
     end
-    
+
     def convert_links(categorized_links)
       converted_links = []
-  
+
       categorized_links.each_with_index do |l, i|
         converted_links[i] = {}
         converted_links[i]['links'] = []
-        converted_links[i]['section'] = categorized_links[i]['section']
-        l["links"].each_with_index do |url, q|
+        converted_links[i]['section'] = l['section']
+        puts "l: #{l}"
+        l['links'].each_with_index do |url, q|
           site_details = check_site_index(url)
+          puts "site details in convert links: #{site_details}"
           converted_links[i]['links'][q] = {}
+          converted_links[i]['links'][q]['url'] = url
           if !site_details.nil?
             unless site_details[:css] == "manual"
               puts url
               begin
-                doc = Nokogiri::HTML(open(url))
+                doc = Nokogiri::HTML(open(url, :allow_redirections => :all))
+                # doc = Nokogiri::HTML(open("app/bloomberg.html"))
                 title_arr = doc.css(site_details[:css])
                 title = []
                 if title_arr.nil? || title_arr.first.nil?
                   title_arr = doc.css("head title")
                   if title_arr.nil? || title_arr.first.nil?
+                    converted_links[i]['links'][q]['placeholder'] = "manual"
                     converted_links[i]['links'][q]['title'] = "manual"
                     converted_links[i]['links'][q]['author'] = "manual"
+                    converted_links[i]['links'][q]['url'] = url
                     next
                   end
                 end
-                title_arr = title_arr.first.content.split /[[:space:]]/
-                title_arr.map{|w| w==title_arr[0] ? title << w : title << w.downcase}
-                converted_links[i]['links'][q]['title'] = title.join(" ")
+                title_arr = title_arr.first.content.split(/[[:space:]]/)
+                converted_links[i]['links'][q]['title'] = title_arr.map{|w| w==title_arr[0] ? w : w.downcase}.join(" ")
                 converted_links[i]['links'][q]['author'] = site_details[:author]
               rescue OpenURI::HTTPError => e
                 puts e.message
+                converted_links[i]['links'][q]['title'] = e.message
+                converted_links[i]['links'][q]['author'] = e.message
               end
             else
               converted_links[i]['links'][q]['author'] = site_details[:author]
               converted_links[i]['links'][q]['title'] = "manual"
             end
           else
-            converted_links[i]['links'][q]['exception'] = "No matching site in database, or URL-related error."
-            converted_links[i]['links'][q]['author'] = "manual"
-            converted_links[i]['links'][q]['title'] = "manual"
             puts url
             begin
-              doc = Nokogiri::HTML(open(url))
+              doc = Nokogiri::HTML(open(url, :allow_redirections => :all))
+              # doc = Nokogiri::HTML(open("app/bloomberg.html"))
               title = []
-              title_arr = doc.css("head title").first.content.split /[[:space:]]/
-              title_arr.map{|w| w==title_arr[0] ? title << w : title << w.downcase}
-              converted_links[i]['links'][q]['placeholder'] = title.join(" ")
+              title_arr = doc.css("head title")
+              if title_arr.nil? || title_arr.first.nil?
+                converted_links[i]['links'][q]['title'] = " "
+                converted_links[i]['links'][q]['author'] = " "
+                converted_links[i]['links'][q]['placeholder'] = "manual"
+                next
+              end
+              title_arr = doc.css("head title").first.content.split(/[[:space:]]/)
+              converted_links[i]['links'][q]['placeholder'] = title_arr.map{|w| w==title_arr[0] ? w : w.downcase}.join(" ")
+              converted_links[i]['links'][q]['author'] = "manual"
+              converted_links[i]['links'][q]['title'] = "manual"
             rescue OpenURI::HTTPError => e
               puts e.message
+              converted_links[i]['links'][q]['title'] = e.message
+              converted_links[i]['links'][q]['author'] = e.message
             end
           end
-          converted_links[i]['links'][q]['url'] = url
         end
       end
       converted_links
     end
-    
-    
-    
+
+
+
     # needs obj array for common sites' info
     def check_site_index(url)
-      site_index = [{"author": "Bloomberg", "url": "http://www.bloomberg.com", "css": "h1[class$=hed]"}, {"author": "Daily Reckoning", "url": "http://www.dailyreckoning.com", "css": "#single-article-body h1"}, {"author": "Zero Hedge", "url": "http://www.zerohedge.com", "css": ".article-list .title"}, {"author": "Real Investment Advice", "url": "http://www.realinvestmentadvice.com", "css": ".cont-text h1 a"}, {"author": "321Gold", "url": "http://www.321gold.com", "css": "head title"}, {"author": "Capitalist Exploits", "url": "http://www.capitalistexploits.at", "css": "h1.entry-title"}, {"author": "Medium", "url": "http://www.medium.com", "css": ".section-inner h1.graf--title"}, {"author": "Hackern Noon", "url": "http://www.hackernoon.com", "css": ".section-inner h1.graf--title"}, {"author": "CNBC", "url": "http://www.cnbc.com", "css": "h1.title"}, {"author": "Independent", "url": "http://www.independent.co.uk", "css": "article.article-article h1"}, {"author": "Newsweek", "url": "http://www.newsweek.com", "css": "header.article-header h1"}, {"author": "Decentralize Today", "url": "http://www.decentralize.today", "css": "h1 graf--title"}, {"author": "The Street", "url": "http://www.thestreet.com", "css": "h1.article__headline"}, {"author": "Slate", "url": "http://www.slate.com", "css": "h1.hed"}, {"author": "AntiWar", "url": "http://www.antiwar.com", "css": "header.entry-header h1.entry-title"}, {"author": "Manila Bulletin", "url": "http://www.business.mb.com.ph", "css": "div h1.uk-article-title"}, {"author": "Silicon", "url": "http://www.silicon.co.uk", "css": "header.entry-header .entry-title"}, {"author": "Kitco", "url": "http://www.kitco.com", "css": "#article-info-title h1"}, {"author": "Schiff Gold", "url": "http://www.schiffgold.com", "css": "div.wpb_wrapper h1#welcome-header"}, {"author": "Reuters", "url": "http://www.reuters.com", "css": "h1[class^=ArticleHeader_headline]"}, {"author": "Yahoo!", "url": "http://www.yahoo.com", "css": "header.canvas-header h1"}, {"author": "Dana Lyons", "url": "http://www.jlfmi.tumblr.com", "css": "div.post-bd h2 a"}, {"author": "Financial Times", "url": "http://www.ft.com", "css": "header.trial-subs__heading span.trial-subs__heading-article-title"}, {"author": "Telegraph", "url": "http://www.telegraph.co.uk", "css": "div.component-content h1.headline_-heading"}, {"author": "BullionStar", "url": "http://www.bullionstar.com", "css": "header.entry-header h1.entry-title"}, {"author": "Coin Telegraph", "url": "http://www.cointelegraph.com", "css": "h1.header"}, {"author": "CATO Institute", "url": "http://www.cato.org", "css": "h1#page-title"}, {"author": "Futurism", "url": "http://www.futurism.com", "css": "section h1"}, {"author": "Engadget", "url": "http://www.engadget.com", "css": "header h1"}, {"author": "Wired", "url": "http://www.wired.com", "css": "h1.title"}, {"author": "Clean Technica", "url": "http://www.cleantechnica.com", "css": "article h1.omc-post-heading-standard"}, {"author": "NY Times", "url": "http://www.nytimes.com", "css": "div#story-meta h1#headline"}, {"author": "Dr. Sircus", "url": "http://www.drsircus.com", "css": "h1.entry-title"}, {"author": "Right Scoop", "url": "http://www.therightscoop.com", "css": "header.entry-header h1.entry-title"}, {"author": "GoldMoney", "url": "http://www.goldmoney.com", "css": "h1"}, {"author": "NorthmanTrader", "url": "http://www.northmantrader.com", "css": "h1[class*=title]"}, {"author": "Evonomics", "url": "http://www.evonomics.com", "css": "header.entry-header h1.page-title"}, {"author": "Automatic Earth", "url": "http://www.theautomaticearth.com", "css": "div.title h1.posttitle a"}, {"author": "Business Insider", "url": "http://www.businessinsider.com.au", "css": "div.container h1"}, {"author": "GoldCore", "url": "http://www.goldcore.com", "css": "h3.entry-title"}, {"author": "Oil Price", "url": "http://www.oilprice.com", "css": "div[class*=Article__wrapper] h1"}, {"author": "Foreign Policy", "url": "http://www.europeslamsitsgates.foreignpolicy.com", "css": "div#header1 h1.post-hed"}, {"author": "Antonius Aquinas", "url": "https://antoniusaquinas.com", "css": "h1.entry-title"}, {"author": "Peak Prosperity", "url": "https://www.peakprosperity.com", "css": "div#content-inner-inner h1.title"}, {"author": "FiveThirtyEight", "url": "https://www.fivethirtyeight.com", "css": "h1.article-title"}, {"author": "Casey Research", "url": "https://www.caseyresearch.com", "css": "h1.entry-header"}, {"author": "MarketWatch", "url": "https://www.marketwatch.com", "css": ".article-headline-wrapper h1"}, {"author": "GATA", "url": "https://www.gata.com", "css": "h1.title"}, {"author": "James Howard Kunstler", "url": "https://www.kunstler.com", "css": "h1.title"}, {"author": "RT", "url": "https://www.rt.com", "css": "h1.article__heading"}, {"author": "WaPo", "url": "https://www.washingtonpost.com", "css": "manual"}, {"author": "Renegade Inc.", "url": "https://www.renegadeinc.com", "css": "h1.entry-title"}, {"author": "Yahoo!", "url": "https://www.finance.yahoo.com", "css": "header.canvas-header h1"}, {"author": "New Yorker", "url": "https://www.newyorker.com", "css": "header[class^=ArticleHeader] h1"}, {"author": "Straight Line Logic", "url": "https://www.straightlinelogic.com", "css": "h1.entry-title"}, {"author": "Credit Bubble Bulletin", "url": "https://www.creditbubblebulletin.blogspot.com", "css": "h3.entry-title"}, {"author": "Nation", "url": "https://www.thenation.com", "css": "div.article-header-content h1.title"}, {"author": "Philly Tribune", "url": "https://www.phillytrib.com", "css": "header.asset-header h1 span"}, {"author": "Fox & Hounds", "url": "https://www.foxandhoundsdaily.com", "css": "h1.entry-heading a"}, {"author": "Birch Gold", "url": "https://www.birchgold.com", "css": "div.post-title-holder h1.entry-title"}, {"author": "MunKnee", "url": "https://www.munknee.com", "css": "h1.entry-title span"}, {"author": "Madison", "url": "https://www.madison.com", "css": "h1.headline span"}, {"author": "Fortune", "url": "https://www.fortune.com", "css": "div.article-info h1.headline"}, {"author": "Longreads", "url": "https://www.longreads.com", "css": "h1.entry-title a"}, {"author": "Weekly Times Now", "url": "https://www.weeklytimesnow.com.au", "css": "manual"}, {"author": "AntiWar", "url": "https://www.news.antiwar.com", "css": "h1.entry-title"}, {"author": "manual", "url": "http://www.t.co", "css": "manual"}]
+      sites_path = "app/assets/javascripts/sites_index.json"
+      sites_index = JSON.parse(File.read(sites_path))
+      i = 0
+      new_site = ""
+      while (i < sites_index.size)
+        puts "indexed site #{sites_index[i]["url"]} \nmatch:#{sites_index[i]["url"].match(url[/\w+\.+\w+/])}"
+        if !sites_index[i]["url"].match(url[/\w+\.+\w+/]).nil?
+          new_site = url
+          break
+        end
+        i+=1
+      end
+      puts "new_site: #{new_site}\n @new_sites: #{@new_sites}"
+      (@new_sites ||= []) << url
+      return nil if new_site.to_s.empty?
+    end
 
+    def process_links
+      @converted_links.size.times do |i| # for each section
+        if params["#{i}"]
+          puts params["#{i}"]
+          @converted_links[i]["links"].size.times do |j|
+            if params["#{i}"]["#{j}"]
+              puts params["#{i}"]["#{j}"]
+              del_arr = []
+              @converted_links[i]["links"][j]["title"].split(" ").size.times do |x|
+                puts "i: #{i.to_s}, j: #{j.to_s}, x: #{x.to_s}"
+                if params["#{i}"]["#{j}"]["#{x}"]
+                  word_param = params["#{i}"]["#{j}"]["#{x}"]
+                  if word_param == ["uc"]
+                    title = @converted_links[i]["links"][j]['title'].split(" ")
+                    title[x].upcase!
+                    @converted_links[i]["links"][j]['title'] = title.join(" ")
+                  elsif word_param == ["dc"]
+                    title = @converted_links[i]["links"][j]['title'].split(" ")
+                    title[x].downcase!
+                    @converted_links[i]["links"][j]['title'] = title.join(" ")
+                  elsif word_param == ["tc"]
+                    title = @converted_links[i]["links"][j]['title'].split(" ")
+                    title[x].capitalize!
+                    @converted_links[i]["links"][j]['title'] = title.join(" ")
+                  elsif word_param == ["del"]
+                    del_arr << x
+                  end
+                end
+              end
+              title = @converted_links[i]["links"][j]['title'].split(" ")
+              title.delete_if.with_index { |_, index| del_arr.include? index }
+              @converted_links[i]["links"][j]['title'] = title.join(" ")
+            end
+          end
+          if params["f#{i}"]
+            params["f#{i}"].each do |flag|
+              @converted_links[i]["links"][flag[0].to_i]["flagged"] = "flagged"
+            end
+          end
+        end
 
-      
-      site_index.each do |site|
-        if !site[:url].match(url[/\/\/\w+\.\w+/][2..-1]).nil?
-          return site
+     # if author and title manually entered
+        if params["author#{i}"]
+          @converted_links[i]["links"].size.times do |j|
+            if params["author#{i}"]["#{j}"]
+              @converted_links[i]["links"][j]['author'] = params["author#{i}"]["#{j}"] if params["author#{i}"]["#{j}"].size > 0
+            end
+          end
+        end
+        if params["title#{i}"]
+          @converted_links[i]["links"].size.times do |j|
+            if params["title#{i}"]["#{j}"]
+              @converted_links[i]["links"][j]['title'] = params["title#{i}"]["#{j}"] if params["title#{i}"]["#{j}"].size > 0
+            end
+          end
         end
       end
-      return nil
+
+      date = Time.now.getlocal('-01:00').strftime("%_m/%d")
+      @html_links = []
+      @converted_links.each_with_index do |s, i|
+        @html_links[i] = {}
+        @html_links[i]['section'] = s['section']
+        @html_links[i]['links'] = []
+        s['links'].each_with_index do |l, j|
+          @html_links[i]['links'] << "#{date}" + (date.size>5 ? "&nbsp;&nbsp;" : "&nbsp;&nbsp;&nbsp;&nbsp;") + "<a href='" + l['url'] + "' target='_blank'>" + (l['title'].nil? ? "" : l['title']) + "</a> – " + (l['author'].nil? ? "" : l['author'])
+        end
+      end
     end
 end
