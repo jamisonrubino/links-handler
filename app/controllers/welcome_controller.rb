@@ -27,7 +27,10 @@ class WelcomeController < ApplicationController
     @converted_links = $converted_links
     process_links
     $converted_links = nil
-    SitesMailer.new_sites_email(params[:sites]).deliver_now if params[:sites].present?
+    if params[:sites].present? && params[:sites].size > 0
+      @sites = params[:sites]
+      SitesMailer.new_sites_email(@sites).deliver_now
+    end
   end
 
   # def add_site
