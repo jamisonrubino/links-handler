@@ -27,9 +27,14 @@ class WelcomeController < ApplicationController
     @converted_links = $converted_links
     process_links
     $converted_links = nil
-    if params[:sites].present? && params[:sites].size > 0
-      @sites = params[:sites]
-      SitesMailer.new_sites_email(@sites).deliver_now
+    begin
+      if params[:sites].present? && params[:sites].size > 0
+        puts "params present & larger than 0"
+        @sites = params[:sites]
+        SitesMailer.new_sites_email(@sites).deliver_now
+      end
+    rescue
+      puts "Something went wrong with SitesMailer"
     end
   end
 
