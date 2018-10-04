@@ -33,6 +33,7 @@ class WelcomeController < ApplicationController
         @sites = params[:sites]
         SitesMailer.new_sites_email(@sites).deliver_now
       end
+      puts "SitesMailer executed successfully."
     rescue
       puts "Something went wrong with SitesMailer"
     end
@@ -153,8 +154,8 @@ class WelcomeController < ApplicationController
         end
         i+=1
       end
-      puts "new_site: #{new_site}\n @new_sites: #{@new_sites}"
       (@new_sites ||= []) << url
+      puts "new_site: #{new_site}\n @new_sites: #{@new_sites}"
       return nil if new_site.to_s.empty?
     end
 
