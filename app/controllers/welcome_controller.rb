@@ -21,7 +21,6 @@ class WelcomeController < ApplicationController
       site_str << "\n" if (i < @new_sites.size-1)
       (@new_sites_html ||= "") << site_str
     end
-  # (@new_sites_selectors ||= []) << find_selector(x)
   end
 
   def all_links
@@ -31,11 +30,11 @@ class WelcomeController < ApplicationController
     SitesMailer.new_sites_email(params[:sites]).deliver_now if params[:sites].present?
   end
 
-  def add_site
-    site = SitesController.new(params[:author], params[:author], params[:css])
-    puts "#{site.author} #{site.url} #{site.css}"
-    save_site(site)
-  end
+  # def add_site
+  #   site = SitesController.new(params[:author], params[:author], params[:css])
+  #   puts "#{site.author} #{site.url} #{site.css}"
+  #   save_site(site)
+  # end
 
   private
     # def find_selector(title)
@@ -57,6 +56,7 @@ class WelcomeController < ApplicationController
       puts categorized_links
       categorized_links
     end
+
 
     def convert_links(categorized_links)
       converted_links = []
