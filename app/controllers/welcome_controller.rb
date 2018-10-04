@@ -27,15 +27,15 @@ class WelcomeController < ApplicationController
     @converted_links = $converted_links
     process_links
     $converted_links = nil
-    begin
-      if params[:sites].present? && params[:sites].size > 0
-        puts "params present & larger than 0"
-        @sites = params[:sites]
+    if params[:sites].present? && params[:sites].size > 0
+      @sites = params[:sites]
+      puts "@sites: #{@sites}"
+      begin
         SitesMailer.new_sites_email(@sites).deliver_now
+        puts "New sites email sent."
+      rescue
+        puts "Something went wrong with SitesMailer"
       end
-      puts "SitesMailer executed successfully."
-    rescue
-      puts "Something went wrong with SitesMailer"
     end
   end
 
