@@ -50,4 +50,4 @@ end
 gem 'nokogiri'
 gem 'open_uri_redirections'
 gem 'figaro'
-gem 'sqlite3'
+gem 'pg'
