@@ -29,7 +29,6 @@ class WelcomeController < ApplicationController
     $converted_links = nil
     if params[:sites].present? && params[:sites].size > 0
       @sites = params[:sites]
-      puts "@sites: #{@sites} \n@sites is an array: #{@sites.instance_of? Array}"
       begin
         SitesMailer.new_sites_email(@sites).deliver_now
         puts "New sites email sent."
