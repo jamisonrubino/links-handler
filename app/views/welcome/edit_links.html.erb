@@ -45,11 +45,27 @@
     </div>
   <% end %>
   <br><br>
-  <%= text_area_tag(:sites, @new_sites_html, size: "50x8") %>
+  <%= text_area_tag(:sites, @new_sites_html, size: "80x12") %>
   <%= submit_tag "To HTML" %>
 <% end %>
 
-<script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
   (function(){
     $("#edit-links input[type=submit]").prop("disabled", true);
       var disabled = true;

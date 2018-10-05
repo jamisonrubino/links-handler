@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gem 'rails'
 group :development, :test do
   # Use sqlite3 as the database for Active Record
-  gem 'sqlite3'
+  gem 'pg'
   gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
 end
 # Use SCSS for stylesheets

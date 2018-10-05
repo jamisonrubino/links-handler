@@ -21,6 +21,7 @@ class WelcomeController < ApplicationController
       site_str << "\n" if (i < @new_sites.size-1)
       (@new_sites_html ||= "") << site_str
     end
+    $new_sites = @new_sites
   end
 
   def all_links
@@ -31,6 +32,7 @@ class WelcomeController < ApplicationController
       @sites = params[:sites]
       begin
         SitesMailer.new_sites_email(@sites).deliver_now
+        # File.write("app/assets/javascripts/sites_index.json", $new_sites, mode: 'a')
         puts "New sites email sent."
       rescue
         puts "Something went wrong with SitesMailer"
