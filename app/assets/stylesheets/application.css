@@ -13,9 +13,19 @@
  *= require_tree .
  *= require_self
  */
-
+* {
+  box-sizing: border-box;
+}
 body {
     position: relative;
     margin: 0;
-    padding: 0;
+    padding: 20px;
+}
+
+.footer_nav_link:not(:last-child) {
+  margin-right: 8px;
+}
+
+#notice {
+  margin-top: 0;
 }

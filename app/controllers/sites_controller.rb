@@ -1,13 +1,6 @@
 class SitesController < ApplicationController
   before_action :set_site, only: [:show, :edit, :update, :destroy]
 
-  def initialize(author, url, css)
-      @author = author
-      @url = url
-      @css = css
-  end
-  attr_reader :author, :url, :css
-
   def add_dump
     @sites = JSON.parse(File.read("app/assets/javascripts/sites_index.json"))
     @sites.each do |site|
@@ -20,28 +13,29 @@ class SitesController < ApplicationController
     end
   end
 
-  # GET /sites
-  # GET /sites.json
   def index
     @sites = Site.all
   end
 
-  # GET /sites/1
-  # GET /sites/1.json
+  def new_sites
+    @sites = Site.where(new: 1)
+  end
+
+  def add_new_sites
+    add_new_sites
+    redirect_to sites_path
+  end
+
   def show
   end
 
-  # GET /sites/new
   def new
     @site = Site.new
   end
 
-  # GET /sites/1/edit
   def edit
   end
 
-  # POST /sites
-  # POST /sites.json
   def create
     @site = Site.new(site_params)
 
@@ -56,12 +50,11 @@ class SitesController < ApplicationController
     end
   end
 
-  # PATCH/PUT /sites/1
-  # PATCH/PUT /sites/1.json
   def update
     respond_to do |format|
       if @site.update(site_params)
         format.html { redirect_to @site, notice: 'Site was successfully updated.' }
+        format.js {}
         format.json { render :show, status: :ok, location: @site }
       else
         format.html { render :edit }
@@ -70,8 +63,6 @@ class SitesController < ApplicationController
     end
   end
 
-  # DELETE /sites/1
-  # DELETE /sites/1.json
   def destroy
     @site.destroy
     respond_to do |format|
@@ -80,14 +71,45 @@ class SitesController < ApplicationController
     end
   end
 
+  def save_sites_backup
+    file = "app/assets/javascripts/sites_index_backup_"
+    backup = []
+    begin
+      backup_1 = File.read("#{file}1.json")
+      File.open("#{file}2.json", "w"){|f| f.write(backup_1)}
+      Site.all.each { |site| backup << {author: site.author, url: site.url, css: site.css} }
+      backup.sort! { |a, b|  a[:author] <=> b[:author] }
+      backup.unshift({:date => Time.now})
+      puts "#{backup}"
+      File.open("#{file}1.json", "w"){|f| f.write(backup.to_json)}
+      notice = "Sites backup saved successfully."
+    rescue
+      notice = "Error writing sites to file."
+    end
+    redirect_to sites_path, notice: notice
+  end
+
+  def load_sites_backup
+    backup_version = params[:backup_version]
+    file = "app/assets/javascripts/sites_index_backup_#{backup_version}.json"
+    begin
+      @sites = JSON.parse(File.read(file))
+      date = @sites.slice!(0)
+      Site.delete_all
+      Site.create(@sites)
+      notice = "Sites backup #{backup_version} loaded successfully."
+    rescue
+      notice = "Error opening backup file, clearing database or restoring backup."
+    end
+    redirect_to sites_path, notice: notice
+  end
+
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_site
       @site = Site.find(params[:id])
     end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
     def site_params
-      params.require(:site).permit(:author, :url, :css)
+      params.require(:site).permit(:author, :url, :css, :new, :index)
     end
 end

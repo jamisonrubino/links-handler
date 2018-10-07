@@ -8,6 +8,16 @@ class ApplicationController < ActionController::Base
     false
   end
 
+  helper_method :add_new_sites
+
+  def add_new_sites
+    @sites.each do |site|
+      site_hash = {:author => "manual", :url => site, :css => "manual", :new => 1}
+      s = Site.new(site_hash)
+      s.save
+    end
+  end
+
   def save_site(site)
     sites_path = "app/assets/javascripts/sites_index.json"
     site_obj = { author: site.author, url: site.url, css: site.css }

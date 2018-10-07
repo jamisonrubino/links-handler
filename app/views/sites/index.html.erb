@@ -2,24 +2,30 @@
 
 <h1>Sites</h1>
 
-<%= link_to "/new_sites", "New Sites", class: "new_sites_link" %>
+<%= link_to "New Sites", new_sites_path, class: "sites_index_header_link" %>
+<%= link_to "Save Backup", save_sites_backup_path, method: "post", class: "sites_index_header_link" %>
+<a onclick="showBackupLinks()" class="sites_index_header_link show_backups_link">Load sites from backup</a>
+<div class="backup_links">
+  <%= link_to "Backup 1", load_sites_backup_path(:backup_version => 1), data: {confirm: 'All sites in database will be replaced.'}, method: "post", class: "sites_backup_link" %>
+  <%= link_to "Backup 2", load_sites_backup_path(:backup_version => 2), data: {confirm: 'All sites in database will be replaced.'}, method: "post", class: "sites_backup_link" %>
+</div>
+<%= link_to 'New Site', new_site_path, class: "new_site_link" %>
 
-<table>
-
+<table class="sites_table">
   <thead>
     <tr>
       <th>Author</th>
-      <th>Url</th>
-      <th>Css</th>
+      <th>URL</th>
+      <th>CSS</th>
       <th colspan="3"></th>
     </tr>
   </thead>
 
   <tbody>
-    <% @sites.each do |site| %>
+    <% @sites.each_with_index do |site, i| %>
       <tr>
         <td><%= site.author %></td>
-        <td><%= site.url %></td>
+        <td><%= link_to site.url, site.url %></td>
         <td><%= site.css %></td>
         <td><%= link_to 'Show', site %></td>
         <td><%= link_to 'Edit', edit_site_path(site) %></td>
@@ -31,4 +37,21 @@
 
 <br>
 
-<%= link_to 'New Site', new_site_path %>
+<script type="text/javascript">
+  function showBackupLinks() {
+    let links = $('.sites_backup_link')
+    links.css("display") == "none" ? links.show(400) : links.hide(400)
+  }
+
+  var offset = document.getElementsByClassName('show_backups_link')[0].getBoundingClientRect(),
+    table,
+    bL
+
+  (function(){
+    table = $('.sites_table')
+    bL = $('.backup_links')
+    bL.css("margin-left", `${offset.left}px`)
+    table.css("top", `${offset.top + 60}px`)
+  })()
+
+</script>

@@ -10,6 +10,10 @@
       </ul>
     </div>
   <% end %>
+  
+  <% if @site.present? && @site.new == 1 %>
+    <%= link_to "#{@site.url[0..30]}...", @site.url, class: "edit_site_url" %>
+  <% end %>
 
   <div class="field">
     <%= form.label :author %>

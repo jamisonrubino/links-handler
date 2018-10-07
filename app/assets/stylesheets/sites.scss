@@ -1,3 +1,64 @@
 // Place all the styles related to the Sites controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+.new_sites_table {
+  tbody {
+    tr {
+      background-color: #ef8;
+    }
+    .filled {
+      background-color: #4ea;
+    }
+    .deselected {
+      background-color: #e85;
+    }
+  }
+}
+
+.sites_table {
+  clear: both;
+  position: absolute;
+  tr:not(:last-child) {
+    border-bottom: 1px solid #bbb;
+  }
+}
+
+.sites_index_header_link {
+  margin-right: 12px;
+  float: left;
+}
+
+.sites_index_header_link:first-child {
+  clear: left;
+}
+
+.show_backups_link {
+  cursor: pointer;
+  float: left;
+  clear: right;
+}
+
+.sites_backup_link {
+  float: left;
+  clear: left;
+  display: none;
+}
+
+.sites_index_header_link, .show_backups_link {
+  font-size: 1.2em;
+  text-decoration: underline;
+}
+
+.backup_links {
+  float: left;
+  clear: both;
+  display: inline-block;
+  overflow: auto;
+  margin-top: 5px;
+  // transition: 0.4s margin-bottom;
+}
+
+.new_site_link {
+  float: right;
+  font-size: 1.2em;
+}

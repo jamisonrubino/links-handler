@@ -4,8 +4,10 @@ source 'https://rubygems.org'
 gem 'rails'
 group :development, :test do
   # Use sqlite3 as the database for Active Record
-  gem 'pg'
   gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug'
+
 end
 # Use SCSS for stylesheets
 gem 'sass-rails'
@@ -33,11 +35,6 @@ gem 'sdoc', group: :doc
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
-
-group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug'
-end
 
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> in views

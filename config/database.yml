@@ -6,10 +6,9 @@
 #
 default: &default
   adapter: postgresql
+  encoding: unicode
   pool: 5
   timeout: 5000
-  username: postgres
-  password: admin
   port: 5432
 
 development:
@@ -25,5 +24,9 @@ test:
 
 production:
   adapter: postgresql
+  database: pg_db
   pool: 5
   timeout: 5000
+  port: 5432
+  username: postgres
+  password: admin

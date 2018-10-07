@@ -1,16 +1,19 @@
 require 'nokogiri'
 require 'open-uri'
 require 'open_uri_redirections'
+require 'openssl'
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 require_relative 'sites_controller'
 
-class WelcomeController < ApplicationController
+class LinksController < ApplicationController
   def index
+    $new_sites = nil
   end
 
   def edit_links
     all_links = params[:links].gsub "\r", ""
-    sites_path = "app/assets/javascripts/sites_index.json"
-    site_index = JSON.parse(File.read(sites_path))
+    file = "app/assets/javascripts/sites_index.json"
+    site_index = JSON.parse(File.read(file))
     categorized_links = objectify_links(all_links)
 
     @converted_links = convert_links(categorized_links)
@@ -21,23 +24,28 @@ class WelcomeController < ApplicationController
       site_str << "\n" if (i < @new_sites.size-1)
       (@new_sites_html ||= "") << site_str
     end
-    $new_sites = @new_sites
+    $sites = @new_sites
   end
 
   def all_links
     @converted_links = $converted_links
     process_links
     $converted_links = nil
-    if params[:sites].present? && params[:sites].size > 0
-      @sites = params[:sites]
+    if $sites.present? && $sites.size > 0
+      @sites = $sites
       begin
-        SitesMailer.new_sites_email(@sites).deliver_now
+        sites = $sites.join "\n"
+        SitesMailer.new_sites_email(sites).deliver_now
         # File.write("app/assets/javascripts/sites_index.json", $new_sites, mode: 'a')
         puts "New sites email sent."
+        add_new_sites
+        puts "added sites"
+        # redirect_to "/add_new_sites", sites: $new_sites and return
       rescue
         puts "Something went wrong with SitesMailer"
       end
     end
+
   end
 
   # def add_site
