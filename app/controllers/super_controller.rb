@@ -1,3 +1,0 @@
-class SuperController < ActionController
-
-end

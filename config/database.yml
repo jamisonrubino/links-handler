@@ -24,7 +24,7 @@ test:
 
 production:
   adapter: postgresql
-  database: pg_db
+  database: production
   pool: 5
   timeout: 5000
   port: 5432

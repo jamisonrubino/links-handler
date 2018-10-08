@@ -2,7 +2,7 @@ require 'nokogiri'
 require 'open-uri'
 require 'open_uri_redirections'
 require 'openssl'
-OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+# OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 require_relative 'sites_controller'
 
 class LinksController < ApplicationController
