@@ -1,4 +1,5 @@
 require 'json'
+require 'open_uri_redirections'
 class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -15,6 +16,19 @@ class ApplicationController < ActionController::Base
       site_hash = {:author => "manual", :url => site, :css => "manual", :new => 1}
       s = Site.new(site_hash)
       s.save
+    end
+  end
+
+  helper_method :preview_site
+
+  def preview_site
+    if params[:url].present?
+      url = params[:url]
+      @site_preview = open(url, :allow_redirections => :all).read
+      @site_preview_url = url
+      respond_to do |format|
+        format.js { render 'preview_site.js.erb' }
+      end
     end
   end
 

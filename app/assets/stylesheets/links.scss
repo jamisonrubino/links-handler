@@ -18,6 +18,11 @@
     left: -5000px;
 }
 
+span.link {
+  position: relative;
+
+}
+
 span.link input.title-input {
     width: 550px;
 }
@@ -61,8 +66,22 @@ span.link input.author-input {
     color: orange;
 }
 
+.url_open_frame {
+  position: absolute;
+  top: -20px;
+  margin-left: -82px;
+  display: none;
+}
+
+.url:hover .url_open_frame {
+}
+
 .flagged {
     background: #ff9;
+}
+
+.flaggedspan label {
+  display: inline-block;
 }
 
 .hide {

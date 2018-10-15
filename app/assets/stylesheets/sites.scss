@@ -2,15 +2,34 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 .new_sites_table {
+  thead {
+    .toggle-checkboxes {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
   tbody {
     tr {
       background-color: #ef8;
+      position: relative;
     }
     .filled {
       background-color: #4ea;
     }
     .deselected {
       background-color: #e85;
+    }
+    td {
+      padding: 7px 5px;
+    }
+    td.submitted {
+      position: absolute;
+      left: 20px;
+      right: 0;
+      height: 31px;
+      text-align: center;
+      background: rgba(68, 238, 170, 0.6);
+      color: white;
     }
   }
 }

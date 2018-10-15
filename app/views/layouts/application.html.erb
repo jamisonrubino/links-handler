@@ -7,8 +7,28 @@
     <%= csrf_meta_tags %>
   </head>
   <body>
-  
+
     <%= yield %>
-  
+
+    <div class="site_mask">
+      <div class="preview_site">
+        <%= @site_preview if @site_preview.present? %>
+      </div>
+      <div class="site_mask_x">&#10006;</div>
+    </div>
   </body>
 </html>
+
+
+<script type="text/javascript">
+  function handleUrlPreview() {
+    $('.site_mask').fadeIn(200)
+  }
+
+  (function(){
+    $('.site_mask_x').on("click", function(){
+      $(this).parents('.site_mask').fadeOut(200)
+      $('.preview_site').html("")
+    })
+  })()
+</script>

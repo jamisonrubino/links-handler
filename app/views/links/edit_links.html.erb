@@ -29,14 +29,20 @@
             <% end %>
 
             <%= link_to "#{link['url'].slice(0, 30)}...", link['url'], class: "url", target: "_blank" %>
+            <%= link_to "Open frame", preview_site_path(:url => link['url']), remote: true, class: "url_open_frame", onclick: "handleUrlPreview()" %>
             <span class="flaggedspan">
-              <% if (@temp_title.size+link['author'].size+3 > 77 || link['title'] == "manual") %>
+              <% @size_warning = @temp_title.size+link['author'].size+3 > 77 %>
+              <% @manual_warning = link['title'] == "manual" %>
+              <% if @size_warning == true || @manual_warning == true %>
+                <% @msg = "Total length" if @size_warning == true %>
+                <% @msg = "Manual entry" if @manual_warning == true %>
+                <%= @msg if @msg.present? %>
                 <%= check_box_tag "f#{i}[#{j}]", "flagged #{}", true %>
+                <%= label_tag "f#{i}[#{j}]", "Flag" %>
               <% else %>
                 <%= check_box_tag "f#{i}[#{j}]", "flagged", false %>
+                <%= label_tag "f#{i}[#{j}]", "Flag" %>
               <% end %>
-
-              <%= label_tag "f#{i}[#{j}]", "Flag" %>
             </span>
             <br>
           <% end %>
@@ -48,21 +54,6 @@
   <!-- <text_area_tag(:sites, @new_sites_html, size: "80x12") %> -->
   <%= submit_tag "To HTML" %>
 <% end %>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <script type="text/javascript">
@@ -87,6 +78,31 @@
     	});
     	if ($(this).find("input").is(":checked")) $("span.link").eq(i).addClass("flagged");
     });
+
+
+// LINK URL "OPEN FRAME" BUTTON APPEARS ON HOVER
+    $(".url").each(function(i){
+      var $that = $(this),
+        sibling = $that.siblings('.url_open_frame'),
+        timeout
+      $(this).mouseenter(function() {
+        sibling.fadeIn(200)
+        clearTimeout(timeout)
+      }).mouseleave(function() {
+        clearTimeout(timeout)
+        timeout = setTimeout(function(){
+          if (jQuery(':hover').filter(sibling).length===0)
+            sibling.fadeOut(200)
+        }, 1000)
+      })
+      sibling.mouseleave(function() {
+        clearTimeout(timeout)
+        timeout = setTimeout(function(){
+          if (jQuery(':hover').filter(sibling).length===0)
+            sibling.fadeOut(200)
+        }, 1000)
+      })
+    })
   }());
 
   function flag(index) {

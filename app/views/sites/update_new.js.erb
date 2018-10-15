@@ -1,0 +1,13 @@
+// $('tr').eq(<%= @index %> + 1).append("<td class='submitted'>Site successfully submitted.</td>")
+console.log("index: <%= @index %>")
+var updatedTr = $('tbody tr').eq(<%= @index %>)
+setTimeout(function(){
+  updatedTr.html(`<td></td><td>${author}</td><td>${url}</td><td>${css}</td><td></td><td></td><td class='submitted'>Site successfully submitted.</td>`)
+  var submittedTd = document.getElementsByClassName("submitted")[0],
+    table = document.getElementsByTagName('table')[0].getClientRects()[0],
+    tr = document.getElementsByTagName('tbody')[0].childNodes[1].getClientRects()[0]
+
+  console.log(updatedTr, submittedTd, table, tr)
+  $('td.submitted').css({height: `${tr.height}px`, width: `${table.width}px`})
+  // $('tbody tr').eq(<%= @index %>).html("<td><%= @site.author %></td><td><%= @site.url %></td><td><%= @site.css %></td><td></td><td></td><td></td><td class='submitted'>Site successfully submitted.</td>")
+}, 3000)

@@ -1,5 +1,5 @@
 class SitesController < ApplicationController
-  before_action :set_site, only: [:show, :edit, :update, :destroy]
+  before_action :set_site, only: [:show, :edit, :update, :destroy, :update_new]
 
   def add_dump
     @sites = JSON.parse(File.read("app/assets/javascripts/sites_index.json"))
@@ -22,7 +22,7 @@ class SitesController < ApplicationController
   end
 
   def add_new_sites
-    add_new_sites
+    super
     redirect_to sites_path
   end
 
@@ -54,7 +54,6 @@ class SitesController < ApplicationController
     respond_to do |format|
       if @site.update(site_params)
         format.html { redirect_to @site, notice: 'Site was successfully updated.' }
-        format.js {}
         format.json { render :show, status: :ok, location: @site }
       else
         format.html { render :edit }
@@ -62,6 +61,23 @@ class SitesController < ApplicationController
       end
     end
   end
+
+
+  def update_new
+    @update_new_params = params
+    @update_new_params.delete_if{|key,value| !key.match(/(id|controller|action)/).nil?}
+    @update_new_params[:new] = @update_new_params[:new].to_i
+    new_params = ActionController::Parameters.new(site: @update_new_params).require(:site).permit(:author, :url, :css, :new, :id)
+    @index = params[:i]
+
+    @site.update(new_params)
+
+    respond_to do |format|
+      format.js { render 'update_new.js.erb' }
+    end
+
+  end
+
 
   def destroy
     @site.destroy
@@ -77,7 +93,7 @@ class SitesController < ApplicationController
     begin
       backup_1 = File.read("#{file}1.json")
       File.open("#{file}2.json", "w"){|f| f.write(backup_1)}
-      Site.all.each { |site| backup << {author: site.author, url: site.url, css: site.css} }
+      Site.all.each { |site| backup << {author: site.author, url: site.url, css: site.css, new: site.new} }
       backup.sort! { |a, b|  a[:author] <=> b[:author] }
       backup.unshift({:date => Time.now})
       puts "#{backup}"
@@ -102,6 +118,10 @@ class SitesController < ApplicationController
       notice = "Error opening backup file, clearing database or restoring backup."
     end
     redirect_to sites_path, notice: notice
+  end
+
+  def preview_site
+    super
   end
 
   private
