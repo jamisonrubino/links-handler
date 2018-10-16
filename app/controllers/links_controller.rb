@@ -14,15 +14,18 @@ class LinksController < ApplicationController
     all_links = params[:links].gsub "\r", ""
     file = "app/assets/javascripts/sites_index.json"
     site_index = JSON.parse(File.read(file))
+    @new_sites = []
     categorized_links = objectify_links(all_links)
 
     @converted_links = convert_links(categorized_links)
     $converted_links = @converted_links
 
-    @new_sites.each_with_index do |x,i|
-      site_str = "#{x}"
-      site_str << "\n" if (i < @new_sites.size-1)
-      (@new_sites_html ||= "") << site_str
+    if @new_sites.size > 0
+      @new_sites.each_with_index do |x,i|
+        site_str = "#{x}"
+        site_str << "\n" if (i < @new_sites.size-1)
+        (@new_sites_html ||= "") << site_str
+      end
     end
     $sites = @new_sites
   end
@@ -155,21 +158,25 @@ class LinksController < ApplicationController
 
     # needs obj array for common sites' info
     def check_site_index(url)
-      sites_path = "app/assets/javascripts/sites_index.json"
-      sites_index = JSON.parse(File.read(sites_path))
-      i = 0
-      new_site = ""
-      while (i < sites_index.size)
-        puts "indexed site #{sites_index[i]["url"]} \nmatch:#{sites_index[i]["url"].match(url[/\w+\.+\w+/])}"
-        if !sites_index[i]["url"].match(url[/\w+\.+\w+/]).nil?
-          new_site = url
-          break
-        end
-        i+=1
+      # sites_path = "app/assets/javascripts/sites_index.json"
+      # sites_index = JSON.parse(File.read(sites_path))
+      # i = 0
+      # new_site = ""
+      # while (i < sites_index.size)
+      #   puts "indexed site #{sites_index[i]["url"]} \nmatch:#{sites_index[i]["url"].match(url[/\w+\.+\w+/])}"
+      #   if !sites_index[i]["url"].match(url[/\w+\.+\w+/]).nil?
+      #     new_site = url
+      #     break
+      #   end
+      #   i+=1
+      # end
+      site_match = Site.where("url like ?", "%#{url[/\w+\.+\w+/]}%")
+      if site_match.size == 0
+        @new_sites << url
+        return nil
       end
-      (@new_sites ||= []) << url
-      puts "new_site: #{new_site}\n @new_sites: #{@new_sites}"
-      return nil if new_site.to_s.empty?
+      # puts "new_site: #{new_site}\n @new_sites: #{@new_sites}"
+      return site_match[0]
     end
 
     def process_links

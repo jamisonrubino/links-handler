@@ -69,8 +69,10 @@ span.link input.author-input {
 .url_open_frame {
   position: absolute;
   top: -20px;
-  margin-left: -82px;
+  margin-left: -88px;
   display: none;
+  background: rgba(255,255,255,0.8);
+  padding: 3px;
 }
 
 .url:hover .url_open_frame {

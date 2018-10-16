@@ -24,7 +24,10 @@ class ApplicationController < ActionController::Base
   def preview_site
     if params[:url].present?
       url = params[:url]
-      @site_preview = open(url, :allow_redirections => :all).read
+      # @site_preview = open(url, :allow_redirections => :all).read
+      # @site_preview.gsub!(/(src|href)="\//, "\\1=\"#{url}")
+      # @site_preview.gsub!("href=\"/", "href=\"#{url}/")
+
       @site_preview_url = url
       respond_to do |format|
         format.js { render 'preview_site.js.erb' }

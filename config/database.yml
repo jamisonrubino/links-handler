@@ -11,7 +11,10 @@ default: &default
   timeout: 5000
   username: postgres
   password: admin
-  port: 6543
+  # laptop
+  port: 5432
+  # desktop
+  # port: 6543
 
 
 development:
