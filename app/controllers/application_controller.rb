@@ -24,7 +24,7 @@ class ApplicationController < ActionController::Base
   def preview_site
     if params[:url].present?
       url = params[:url]
-      @site_local_path = Rails.root.join("app", "assets", "site_preview.html")
+      @site_local_path = Rails.root.join("assets", "site_preview.html")
       @site_preview = open(url, :allow_redirections => :all).read
       @site_preview.gsub!(/(src|href)="\//, "\\1=\"#{url}")
       File.open(@site_local_path, "w"){|f| f.write(@site_preview)}
