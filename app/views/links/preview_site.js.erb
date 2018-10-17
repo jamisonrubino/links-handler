@@ -1,5 +1,5 @@
 console.log("preview_site.js.erb")
-$('.preview_site').html("<iframe src='<%= @site_local_path %>'></iframe>")
+$('.preview_site').html("<iframe src='<%= asset_path('site_preview.html') %>'></iframe>")
 
 
 // $.ajax({

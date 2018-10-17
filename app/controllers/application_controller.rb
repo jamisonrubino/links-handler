@@ -4,12 +4,12 @@ class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
+  helper_method :add_new_sites, :preview_site, :reset_site
 
   def local_request?
     false
   end
 
-  helper_method :add_new_sites
 
   def add_new_sites
     @sites.each do |site|
@@ -19,29 +19,23 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  helper_method :preview_site
-
   def preview_site
     if params[:url].present?
       url = params[:url]
-      @site_local_path = Rails.root.join("assets", "site_preview.html")
       @site_preview = open(url, :allow_redirections => :all).read
       @site_preview.gsub!(/(src|href)="\//, "\\1=\"#{url}")
-      File.open(@site_local_path, "w"){|f| f.write(@site_preview)}
-      @site_preview_local_path = "app/assets/site_preview.html"
-      # @site_preview.gsub!("href=\"/", "href=\"#{url}/")
-
-      @site_preview_url = url
+      @preview_path = ActionController::Base.helpers.asset_path('preview_site.html')
+      File.open(@preview_path, "w"){|f| f << @site_preview}
+      # @site_preview_url = url
       respond_to do |format|
         format.js { render 'preview_site.js.erb' }
       end
     end
   end
 
-  helper_method :reset_site
-
   def reset_site
-    File.open(@site_local_path, "w"){|f| f.write("")}
+    @preview_site = ActionController::Base.helpers.asset_path('preview_site.html')
+    File.open(@preview_site, "w"){|f| f.truncate(0)}
   end
 
   def save_site(site)

@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   post '/load_sites_backup', to: "sites#load_sites_backup"
   post '/test_params', to: "sites#test_params"
   get '/preview_site', to: "links#preview_site"
+  get '/reset_site', to: "links#reset_site"
   post "/edit_links", to: "links#edit_links"
   post "/all_links", to: "links#all_links"
   root "links#index"
