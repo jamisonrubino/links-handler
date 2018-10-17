@@ -81,10 +81,8 @@ class SitesController < ApplicationController
 
   def destroy
     @site.destroy
-    respond_to do |format|
-      format.html { redirect_to sites_url, notice: 'Site was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    flash[:notice] = 'Site was successfully destroyed.'
+    redirect_back(fallback_location: sites_path)
   end
 
   def save_sites_backup
@@ -121,6 +119,10 @@ class SitesController < ApplicationController
   end
 
   def preview_site
+    super
+  end
+
+  def reset_site
     super
   end
 

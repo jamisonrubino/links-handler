@@ -15,14 +15,20 @@
     </thead>
       <tbody>
         <% @sites.each_with_index do |site, i| %>
-          <tr>
-            <td><%= check_box_tag "selected_sites[]", site.id, class: "new_site_checkbox", checked: true %></td>
+          <% @url = site[:url][/(http)s?:\/\/(?<uri>[\w\d\.]+)/, "uri"] %>
+          <tr class="deselected">
+            <td><%= check_box_tag "selected_sites[]", site.id, false, class: "new_site_checkbox" %></td>
             <td><%= text_field_tag(:author, "", placeholder: "Author") %></td>
-            <td><%= text_field_tag(:url, "", placeholder: "Base URL") %></td>
+            <td><%= text_field_tag(:url, @url, placeholder: "Base URL") %></td>
             <td><%= text_field_tag(:css, "", placeholder: "CSS selector for title") %></td>
-            <td><%= link_to "#{site.url[0..20]}...", preview_site_path(:url => site.url), remote: true, class: "url", onclick: "handleUrlPreview()" %></td>
+
+            <td>
+              <%= link_to "#{site.url.slice(0, 30)}...", site.url, class: "url", target: "_blank" %>
+              <%= link_to "Open frame", preview_site_path(:url => site.url), remote: true, class: "url_open_frame", onclick: "handleUrlPreview()" %>
+            </td>
             <td><%= link_to 'Destroy', site, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-            <td><%= link_to "Update", "#", onclick: "updateSite(#{site.id}, #{i})" %></td>
+            <td><%= link_to "Update", "javascript:;", onclick: "updateSite(#{site.id}, #{i})" %></td>
+            <td class='warning'>Please fill all inputs before updating.</td>
           </tr>
         <% end %>
       </tbody>
@@ -37,98 +43,4 @@
 <%= link_to 'New Site', new_site_path, class: "footer_nav_link" %>
 
 
-<script type="text/javascript">
-
-  var updatedSiteRow
-
-  function updateSite(id, i) {
-    let tr = $('tbody tr').eq(i),
-      author = tr.find('td input[name=author]').eq(0).val(),
-      url = tr.find('td input[name=url]').eq(0).val(),
-      css = tr.find('td input[name=css]').eq(0).val(),
-      data = {
-        id: id,
-        author: author,
-        url: url,
-        css: css,
-        new: 0,
-        i: i
-      }
-
-    $.post(`/update_new_site`, data)
-
-  }
-
-  function checkInputs(tr) {
-    let els = tr.find('td input[type=text]'),
-      empty = false
-      // submit = tr.find('td input[type=submit]').eq(0)
-
-    for (var item of els)
-      if (item.value.length < 1) empty = true
-
-    if (empty) {
-      tr.removeClass('filled')
-      // submit.prop("disabled", true)
-    } else {
-      // let author = tr.find('td input[name=author]').eq(0).val(),
-      //   url = tr.find('td input[name=url]').eq(0).val(),
-      //   css = tr.find('td input[name=css]').eq(0).val(),
-      //   params = [['updateUrl', url], ['updateCss', css], ['updateAuthor', author]]
-      //
-      // for(let i=0; i<params.length; i++)
-      //   tr.find(`input[type=hidden][name=${params[i][0]}]`).val(params[i][1])
-
-      tr.addClass('filled')
-      // submit.prop("disabled", false)
-    }
-  }
-
-
-
-  var allChecked = true,
-    checkboxes = $('input[type=checkbox]'),
-    textInputs = $('input[type=text]')
-
-  function toggleAllCheckboxes() {
-    checkboxes.prop('checked', !allChecked)
-    allChecked = !allChecked
-    checkboxes.each(function(i){
-      handleCheckboxChange(checkboxes.eq(i))
-      checkInputs(checkboxes.eq(i).parents('tr'))
-    })
-  }
-
-  function handleCheckboxChange(chbx) {
-    var tr = chbx.parents('tr')
-    if (chbx.is(":checked")) {
-      checkInputs(tr)
-      tr.removeClass('deselected')
-    } else {
-      tr.addClass('deselected')
-    }
-  }
-
-  (function(){
-    checkboxes.each(function(i){
-      var $that = $(this)
-      $(this).parents('td').on("click", function(e){
-  	    $that.prop("checked", !$that.prop("checked"))
-        handleCheckboxChange($that)
-      })
-    })
-
-    textInputs.each(function(i){
-      var $that = $(this)
-      $(this).on("keyup", function(){
-        let tr = textInputs.eq(i).parents('tr')
-        checkInputs(tr)
-      })
-    })
-
-    $('input[name=submit_checkbox]').on("change", function(){
-      $('input[name=commit]').eq(0).prop('disabled', !$(this).prop("checked"))
-    })
-  })()
-
-</script>
+<%= javascript_include_tag "sites/new_sites" %>

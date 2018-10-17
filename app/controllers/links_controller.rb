@@ -55,6 +55,10 @@ class LinksController < ApplicationController
       super
   end
 
+  def reset_site
+    super
+  end
+
   # def add_site
   #   site = SitesController.new(params[:author], params[:author], params[:css])
   #   puts "#{site.author} #{site.url} #{site.css}"
@@ -170,7 +174,7 @@ class LinksController < ApplicationController
       #   end
       #   i+=1
       # end
-      site_match = Site.where("url like ?", "%#{url[/\w+\.+\w+/]}%")
+      site_match = Site.where("url like ?", "%#{url[/(http)s?:\/\/(?<uri>[\w\d\.]+)/, "uri"]}%")
       if site_match.size == 0
         @new_sites << url
         return nil

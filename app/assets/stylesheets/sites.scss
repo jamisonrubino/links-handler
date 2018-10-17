@@ -10,14 +10,16 @@
   }
   tbody {
     tr {
-      background-color: #ef8;
       position: relative;
     }
-    .filled {
+    tr td {
+      background-color: #ef8;
+    }
+    .filled td {
       background-color: #4ea;
     }
-    .deselected {
-      background-color: #e85;
+    .deselected td {
+      background-color: #f75;
     }
     td {
       padding: 7px 5px;
@@ -30,6 +32,10 @@
       text-align: center;
       background: rgba(68, 238, 170, 0.6);
       color: white;
+    }
+    td.warning {
+      background-color: #f97;
+      display: none;
     }
   }
 }
@@ -80,4 +86,17 @@
 .new_site_link {
   float: right;
   font-size: 1.2em;
+}
+
+.url {
+    color: black;
+}
+
+.url_open_frame {
+  position: absolute;
+  margin-left: -75px;
+  display: none;
+  background: rgba(255,255,255,0.98);
+  padding: 5px;
+  z-index: 10;
 }

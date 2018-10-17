@@ -24,8 +24,11 @@ class ApplicationController < ActionController::Base
   def preview_site
     if params[:url].present?
       url = params[:url]
-      # @site_preview = open(url, :allow_redirections => :all).read
-      # @site_preview.gsub!(/(src|href)="\//, "\\1=\"#{url}")
+      @site_local_path = Rails.root.join("app", "assets", "site_preview.html")
+      @site_preview = open(url, :allow_redirections => :all).read
+      @site_preview.gsub!(/(src|href)="\//, "\\1=\"#{url}")
+      File.open(@site_local_path, "w"){|f| f.write(@site_preview)}
+      @site_preview_local_path = "app/assets/site_preview.html"
       # @site_preview.gsub!("href=\"/", "href=\"#{url}/")
 
       @site_preview_url = url
@@ -33,6 +36,12 @@ class ApplicationController < ActionController::Base
         format.js { render 'preview_site.js.erb' }
       end
     end
+  end
+
+  helper_method :reset_site
+
+  def reset_site
+    File.open(@site_local_path, "w"){|f| f.write("")}
   end
 
   def save_site(site)
