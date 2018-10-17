@@ -1,4 +1,4 @@
-class SitesController < ApplicationController
+class SitesController < SuperController
   before_action :set_site, only: [:show, :edit, :update, :destroy, :update_new]
 
   def add_dump
@@ -118,13 +118,13 @@ class SitesController < ApplicationController
     redirect_to sites_path, notice: notice
   end
 
-  def preview_site
-    super
-  end
-
-  def reset_site
-    super
-  end
+  # def preview_site
+  #   super
+  # end
+  #
+  # def reset_site
+  #   super
+  # end
 
   private
     def set_site

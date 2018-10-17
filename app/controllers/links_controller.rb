@@ -1,11 +1,10 @@
 require 'nokogiri'
 require 'open-uri'
 require 'open_uri_redirections'
-require 'openssl'
-OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
 require_relative 'sites_controller'
 
-class LinksController < ApplicationController
+class LinksController < SuperController
   def index
     $new_sites = nil
   end
@@ -51,13 +50,13 @@ class LinksController < ApplicationController
 
   end
 
-  def preview_site
-      super
-  end
-
-  def reset_site
-    super
-  end
+  # def preview_site
+  #     super
+  # end
+  #
+  # def reset_site
+  #   super
+  # end
 
   # def add_site
   #   site = SitesController.new(params[:author], params[:author], params[:css])
