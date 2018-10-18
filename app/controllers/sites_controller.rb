@@ -1,4 +1,4 @@
-class SitesController < SuperController
+class SitesController < ApplicationController
   before_action :set_site, only: [:show, :edit, :update, :destroy, :update_new]
 
   def add_dump

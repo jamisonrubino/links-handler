@@ -4,7 +4,7 @@ require 'open_uri_redirections'
 
 require_relative 'sites_controller'
 
-class LinksController < SuperController
+class LinksController < ApplicationController
   def index
     $new_sites = nil
   end
