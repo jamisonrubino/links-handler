@@ -66,7 +66,7 @@
 .sites_backup_link {
   float: left;
   clear: left;
-  display: none;
+  // display: none;
 }
 
 .sites_index_header_link, .show_backups_link {
@@ -80,6 +80,7 @@
   display: inline-block;
   overflow: auto;
   margin-top: 5px;
+  display: none;
   // transition: 0.4s margin-bottom;
 }
 

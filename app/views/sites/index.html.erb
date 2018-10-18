@@ -5,11 +5,11 @@
 <%= link_to "New Sites", new_sites_path, class: "sites_index_header_link" %>
 <%= link_to "Save Backup", save_sites_backup_path, method: "post", class: "sites_index_header_link" %>
 <a onclick="showBackupLinks()" class="sites_index_header_link show_backups_link">Load sites from backup</a>
+<%= link_to 'New Site', new_site_path, class: "new_site_link" %>
 <div class="backup_links">
   <%= link_to "Backup 1", load_sites_backup_path(:backup_version => 1), data: {confirm: 'All sites in database will be replaced.'}, method: "post", class: "sites_backup_link" %>
   <%= link_to "Backup 2", load_sites_backup_path(:backup_version => 2), data: {confirm: 'All sites in database will be replaced.'}, method: "post", class: "sites_backup_link" %>
 </div>
-<%= link_to 'New Site', new_site_path, class: "new_site_link" %>
 
 <table class="sites_table">
   <thead>
@@ -36,5 +36,4 @@
 </table>
 
 <br>
-
-<%= javascript_include_tag "sites/index" %>
+<%= javascript_include_tag "sites/sites_index" %>
