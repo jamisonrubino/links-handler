@@ -11,29 +11,10 @@
     <%= yield %>
 
     <div class="site_mask">
-      <span class="preview_failure"><%= @site_preview_url[0..30] if @site_preview_url.present? %>... denies external access.</span>
+      <!-- <span class="preview_failure">< @site_preview_url[0..30] if @site_preview_url.present? %>... denies external access.</span> -->
       <div class="preview_site">
-        <%= @site_preview if @site_preview.present? %>
       </div>
       <div class="site_mask_x">&#10006;</div>
     </div>
   </body>
 </html>
-
-
-<script type="text/javascript">
-  function handleUrlPreview() {
-    $('.site_mask').fadeIn(200)
-  }
-
-  (function(){
-    $('.site_mask_x').on("click", function(){
-      $(this).parents('.site_mask').fadeOut(200)
-      $('.preview_site').html("")
-      $('.preview_failure').fadeOut(200)
-      $.get('/reset_site', function(){
-        console.log("reset site")
-      })
-    })
-  })()
-</script>
