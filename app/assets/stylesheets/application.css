@@ -35,6 +35,18 @@ body {
   margin-top: 0;
 }
 
+.url_open_frame {
+  position: absolute;
+  margin-left: -75px;
+  /* margin-top: -15px; */
+  display: none;
+  background: rgba(255,255,255,0.98);
+  padding: 2px;
+  z-index: 10;
+  border-radius: 2px;
+  box-shadow: 0 0 3px 1px rgba(20,20,20,0.3);
+}
+
 .site_mask {
   position: fixed;
   width: 100%;

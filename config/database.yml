@@ -12,9 +12,9 @@ default: &default
   username: postgres
   password: admin
   # laptop
-  port: 5432
+  # port: 5432
   # desktop
-  # port: 6543
+  port: 6543
 
 
 development:

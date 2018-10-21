@@ -20,7 +20,21 @@
 
 span.link {
   position: relative;
+}
 
+span.link.flagged.length {
+  background: #ff9;
+}
+
+span.link.flagged.manual {
+  background: #f77;
+}
+
+span.flaggedmessage {
+  padding: 2px;
+  border-radius: 3px;
+  background: yellow;
+  box-shadow: 0 0 2px 1px rgba(20,20,20,0.3);
 }
 
 span.link input.title-input {
@@ -76,10 +90,6 @@ span.link input.author-input {
 }
 
 .url:hover .url_open_frame {
-}
-
-.flagged {
-    background: #ff9;
 }
 
 .flaggedspan label {

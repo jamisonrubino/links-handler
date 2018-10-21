@@ -1,7 +1,7 @@
 var updatedSiteRow,
   warning = null,
   warningTimeout
-  
+
 function updateSite(id, i) {
   let tr = $('tbody tr').eq(i),
     author = tr.find('td input[name=author]').eq(0).val(),

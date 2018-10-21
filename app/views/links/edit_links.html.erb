@@ -19,7 +19,7 @@
 
             <% @temp_title.split(" ").each_with_index do |title_word, x| %>
 
-              <span>
+              <span class="word-span">
                 <a onClick="caseChange(this, <%= "#{i}, #{j}, #{x}" %>);" class="title-word"><%= title_word %></a>
                 <%= check_box_tag "#{i}[#{j}[#{x}]][]", "dc", false, class: "hidden" %>
                 <%= check_box_tag "#{i}[#{j}[#{x}]][]", "uc", false, class: "hidden" %>
@@ -31,18 +31,19 @@
             <%= link_to "#{link['url'].slice(0, 30)}...", link['url'], class: "url", target: "_blank" %>
             <%= link_to "Open frame", preview_site_path(:url => link['url']), remote: true, class: "url_open_frame", onclick: "handleUrlPreview()" %>
             <span class="flaggedspan">
-              <% @size_warning = @temp_title.size+link['author'].size+3 > 77 %>
-              <% @manual_warning = link['title'] == "manual" %>
-              <% if @size_warning == true || @manual_warning == true %>
-                <% @msg = "Total length" if @size_warning == true %>
-                <% @msg = "Manual entry" if @manual_warning == true %>
-                <%= @msg if @msg.present? %>
-                <%= check_box_tag "f#{i}[#{j}]", "flagged #{}", true %>
-                <%= label_tag "f#{i}[#{j}]", "Flag" %>
-              <% else %>
-                <%= check_box_tag "f#{i}[#{j}]", "flagged", false %>
-                <%= label_tag "f#{i}[#{j}]", "Flag" %>
-              <% end %>
+              <!-- < @size_warning = @temp_title.size+link['author'].size+3 > 77 %>
+              < @manual_warning = link['title'] == "manual" %>
+              < if @size_warning == true || @manual_warning == true %>
+                < @msg = "Total length" if @size_warning == true %>
+                < @msg = "Manual entry" if @manual_warning == true %>
+                < @msg if @msg.present? %> -->
+              <span class="flaggedmessage"></span>
+              <%= check_box_tag "f#{i}[#{j}]", "flagged", link['title'] == "manual" || @temp_title.size+link['author'].size > 74 %>
+              <%= label_tag "f#{i}[#{j}]", "Flag" %>
+              <!-- < else %>
+                < check_box_tag "f#{i}[#{j}]", "flagged", false %>
+                < label_tag "f#{i}[#{j}]", "Flag" %>
+              < end %> -->
             </span>
             <br>
           <% end %>
