@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   post '/save_sites_backup', to: "sites#save_sites_backup"
   post '/load_sites_backup', to: "sites#load_sites_backup"
   get '/preview_site', to: "application#preview_site"
-  get '/reset_site', to: "application#reset_site"
+  # get '/reset_site', to: "application#reset_site"
   post "/edit_links", to: "links#edit_links"
   post "/all_links", to: "links#all_links"
   root "links#index"
