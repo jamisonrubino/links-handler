@@ -1,7 +1,6 @@
 var linkCount = $('.link').length,
   titleCount = new Array(linkCount),
   flaggedSpan = $("span.flaggedspan"),
-  flaggedMsg = $("span.flaggedmessage"),
   flagObj = []
 
 function flag(index) {
@@ -10,14 +9,15 @@ function flag(index) {
     $("span.link").eq(index).removeClass("flagged")
 }
 
-function handleFlag(i, len, author = null, link = null) {
+function handleFlag(i, j, len, author = null, link = null) {
   console.log("handleFlag started")
-  let flag = $('input[type=checkbox].flagged').eq(i),
+  let flag = $('.section').eq(i).find('input[type=checkbox].flagged').eq(j),
+    flaggedMsg = $('.section').eq(i).find("span.flaggedmessage").eq(j),
     messages = [],
     cL = []
   console.log(messages, cL)
-  author = (author || $('.author').eq(i).text().slice(0,-3))
-  link = (link || $('.link').eq(i))
+  author = (author || $('.section').eq(i).find('.author').eq(j).text().slice(0,-3))
+  link = (link || $('.section').eq(i).find('.link').eq(j))
   len += author.length
   if (len > 74) {
     messages.push("Too long.")
@@ -42,22 +42,24 @@ function handleFlag(i, len, author = null, link = null) {
 }
 
 
-function toggleDel(i, nL, del) {
+function toggleDel(i, j) {
   var wordsArr = [],
-    l = $('.link').eq(i).find('.title-word'),
+    l = $('.section').eq(i).find('.link').eq(j).find('.title-word'),
     len
-  for (let j=0; j<l.length; j++)
-    wordsArr.push(l.eq(j).text().length)
-  len = wordsArr.reduce((acc, curr)=>acc + curr) + (wordsArr.length - 1) - (del ? nL.length : 0)
-  handleFlag(i, len)
-  wordsArr = []
+  for (let x=0; x<l.length; x++) {
+    if (!l.eq(x).hasClass("del")) wordsArr.push(l.eq(x).text().length)
+    console.log(l.eq(x).text(), l.eq(x).text().length)
+  }
+  console.log(wordsArr)
+  len = wordsArr.reduce((acc, curr)=>acc + curr) + (wordsArr.length - 1)
+  handleFlag(i, j, len)
 }
 
 
-function caseChange(link, i, j, x) {
-  var newLink = link.innerHTML,
+function caseChange(i, j, x) {
+  var link = $('.section').eq(i).find('.link').eq(j).find('.title-word').eq(x)
+    newLink = link.text(),
     reg = /^[a-zA-Z]$/,
-    cap,
     sliced = false,
     beg = false
 
@@ -73,11 +75,11 @@ function caseChange(link, i, j, x) {
 
   // FIND THE FIRST A-Za-z CHAR, SEPARATE BEGINNING CHARS FROM LETTERS, MANIPULATE LETTERS, REJOIN LATER
   if (reg.test(newLink[0]) === false) {
-    for (var i=0; i<newLink.length; i++) {
-      if (reg.test(newLink[i]) === true) {
+    for (var y=0; y<newLink.length; y++) {
+      if (reg.test(newLink[y]) === true) {
         sliced = true
-        beg = newLink.slice(0,i)
-        newLink = newLink.slice(i)
+        beg = newLink.slice(0,y)
+        newLink = newLink.slice(y)
         break
       }
     }
@@ -85,34 +87,35 @@ function caseChange(link, i, j, x) {
 
   if (newLink === newLink.toUpperCase() && delBox.is(":checked") == false) {
     console.log(link)
-    link.classList.add("del")
+    link.addClass("del")
     boxName = "del"
 
-    toggleDel(i, newLink, true)
+    toggleDel(i, j)
+    console.log("newLink: ", newLink)
 
   } else if (delBox.is(":checked")) {
     if (sliced) {
-      link.innerHTML = beg + newLink.toLowerCase()
+      link.text(`${beg + newLink.toLowerCase()}`)
     } else {
-      link.innerHTML = newLink.toLowerCase()
+      link.text(`${newLink.toLowerCase()}`)
     }
-    link.classList.remove("del")
+    link.removeClass("del")
     boxName = "dc"
 
-    toggleDel(i, newLink, false)
+    toggleDel(i, j)
 
   } else if (newLink[0] === newLink[0].toUpperCase() && newLink !== newLink.toUpperCase()) {
     if (sliced) {
-      link.innerHTML = beg + newLink.toUpperCase()
+      link.text(`${beg + newLink.toUpperCase()}`)
     } else {
-      link.innerHTML = newLink.toUpperCase()
+      link.text(`${newLink.toUpperCase()}`)
     }
     boxName = "uc"
   } else if (newLink === newLink.toLowerCase()) {
     if (sliced) {
-      link.innerHTML = beg + newLink[0].toUpperCase() + newLink.slice(1)
+      link.text(`${beg + newLink[0].toUpperCase() + newLink.slice(1)}`)
     } else {
-      link.innerHTML = newLink[0].toUpperCase() + newLink.slice(1)
+      link.text(`${newLink[0].toUpperCase() + newLink.slice(1)}`)
     }
     boxName = "tc"
   }
@@ -200,29 +203,31 @@ function toggleInput(i, j) {
       }, 1000)
     })
 
-    $('.url_open_frame').eq(i).css("top", `${$that.offset().top - 42}px`)
+    // $('.url_open_frame').eq(i).css("top", `${$that.offset().top - 42}px`)
   })
 
 // LINK FLAGGING
-  $('.link').each(i=>{
-    var $that = $('.link').eq(i)
-    console.log("this: ", $(this))
-    $('.link').eq(i).find('input[type=text]').on("keyup", function(i){
-      var author = $that.find('.author-input').eq(0).val(),
-        title = $that.find('.title-input').eq(0).val(),
-        len = title.length
-      console.log(author, title, len)
-      handleFlag(i, len, author, $that)
-    })
+  $('.section').each(i=>{
+    $('.section').eq(i).find('.link').each(j=>{
+      var $that = $('.section').eq(i).find('.link').eq(j)
+      console.log("this: ", $(this))
+      $('.section').eq(i).find('.link').eq(j).find('input[type=text]').on("keyup", function(x){
+        var author = $that.find('.author-input').eq(0).val(),
+          title = $that.find('.title-input').eq(0).val(),
+          len = title.length
+        console.log(author, title, len)
+        handleFlag(i, j, len, author, $that)
+      })
 
-    var wordsArr = [],
-      l = $('.link').eq(i).find('.title-word'),
-      len
-    for (let j=0; j<l.length; j++)
-      wordsArr.push(l.eq(j).text().length)
-    len = wordsArr.reduce((acc, curr)=>acc + curr) + (wordsArr.length - 1)
-    handleFlag(i, len)
-    wordsArr = []
+      var wordsArr = [],
+        l = $('.section').eq(i).find('.link').eq(j).find('.title-word'),
+        len
+      for (let y=0; y<l.length; y++)
+        wordsArr.push(l.eq(y).text().length)
+      len = wordsArr.reduce((acc, curr)=>acc + curr) + (wordsArr.length - 1)
+      handleFlag(i, j, len)
+      wordsArr = []
+    })
   })
 
 })();

@@ -20,7 +20,7 @@
             <% @temp_title.split(" ").each_with_index do |title_word, x| %>
 
               <span class="word-span">
-                <a onClick="caseChange(this, <%= "#{i}, #{j}, #{x}" %>);" class="title-word"><%= title_word %></a>
+                <a onClick="caseChange(<%= "#{i}, #{j}, #{x}" %>);" class="title-word"><%= title_word %></a>
                 <%= check_box_tag "#{i}[#{j}[#{x}]][]", "dc", false, class: "hidden" %>
                 <%= check_box_tag "#{i}[#{j}[#{x}]][]", "uc", false, class: "hidden" %>
                 <%= check_box_tag "#{i}[#{j}[#{x}]][]", "tc", false, class: "hidden" %>

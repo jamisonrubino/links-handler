@@ -13,17 +13,3 @@
 //= require jquery3
 //= require jquery_ujs
 //= require turbolinks
-function handleUrlPreview() {
-  $('.site_mask').fadeIn(200)
-}
-
-(function(){
-  $('.site_mask_x').on("click", function(){
-    $(this).parents('.site_mask').fadeOut(200)
-    $('.preview_site').html("")
-    // $('.preview_failure').fadeOut(200)
-    // $.get('/reset_site', function(){
-    //   console.log("reset site")
-    // })
-  })
-})()

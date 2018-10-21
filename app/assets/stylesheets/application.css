@@ -45,6 +45,7 @@ body {
   z-index: 10;
   border-radius: 2px;
   box-shadow: 0 0 3px 1px rgba(20,20,20,0.3);
+  top: -4px;
 }
 
 .site_mask {
