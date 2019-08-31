@@ -50,29 +50,7 @@ class LinksController < ApplicationController
 
   end
 
-  # def preview_site
-  #     super
-  # end
-  #
-  # def reset_site
-  #   super
-  # end
-
-  # def add_site
-  #   site = SitesController.new(params[:author], params[:author], params[:css])
-  #   puts "#{site.author} #{site.url} #{site.css}"
-  #   save_site(site)
-  # end
-
   private
-    # def find_selector(title)
-    #   doc = Nokogiri::HTML(open("app/bloomberg.html"))
-    #   body_arr = doc.at_css('body').text.strip.split("<") #body split at <s
-    #   element = body_arr[body_arr.index{|x| x.include? title}] #search body for element containing title
-    #   tag = element[/\w/] #isolate element's tag name
-    #   classes = element[/(class=).+(\'|\"|\`)/i][8..-2] #isolate element's classes
-    # end
-
     def objectify_links(all, categorized_links = [])
       all.split(/\n{4,}/).each_with_index do |section, i|
         section.split(/\n+/).each_with_index do |line, j|
@@ -161,24 +139,11 @@ class LinksController < ApplicationController
 
     # needs obj array for common sites' info
     def check_site_index(url)
-      # sites_path = "app/assets/javascripts/sites_index.json"
-      # sites_index = JSON.parse(File.read(sites_path))
-      # i = 0
-      # new_site = ""
-      # while (i < sites_index.size)
-      #   puts "indexed site #{sites_index[i]["url"]} \nmatch:#{sites_index[i]["url"].match(url[/\w+\.+\w+/])}"
-      #   if !sites_index[i]["url"].match(url[/\w+\.+\w+/]).nil?
-      #     new_site = url
-      #     break
-      #   end
-      #   i+=1
-      # end
       site_match = Site.where("url like ?", "%#{url[/(http)s?:\/\/(?<uri>[\w\d\.]+)/, "uri"]}%")
       if site_match.size == 0
         @new_sites << url
         return nil
       end
-      # puts "new_site: #{new_site}\n @new_sites: #{@new_sites}"
       return site_match[0]
     end
 
